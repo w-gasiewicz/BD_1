@@ -1,0 +1,103 @@
+drop table PLANES;
+drop table EMPLOYEE cascade constraints;
+drop table ROUTES cascade constraints;
+drop table REPAIRS cascade constraints;
+drop table AIRLINES;
+drop table FLIGHT cascade constraints;
+drop table REPAIRLOG cascade constraints;
+
+create table PLANES(
+Model varchar(255) NOT NULL,
+Producer varchar(255) NOT NULL,
+REG varchar(40) PRIMARY KEY,
+Airline_id int NOT NULL,
+MaxSpeed int,
+MaxRange int,
+Capacity int,
+ProductionYear date);
+
+create table EMPLOYEE(
+Employee_id int PRIMARY KEY,
+Airline_id int NOT NULL,
+Position varchar(40) not null,
+FirstName varchar(255) not null,
+LastName varchar(255) not null,
+Salary number(10,2) NOT NULL);
+
+create table ROUTES(
+Route_id int PRIMARY KEY,
+Destination varchar(255) NOT NULL,
+StartPlace varchar(255) NOT NULL,
+AvgTime TIMESTAMP NOT NULL);
+
+create table REPAIRS(
+Repair_id int PRIMARY KEY,
+REG varchar(40) NOT NULL,
+Status varchar(40) NOT NULL,
+StartDate date,
+RepairCost number(12,2) NOT NULL);
+
+create table AIRLINES(
+Airline_id int PRIMARY KEY,
+Airline varchar(255) NOT NULL,
+CreationDate date,
+Employee_id int NOT NULL CHECK(EMPLOYEE.Position='BOSS'),
+CountOfAircraft int);
+
+create table FLIGHT(
+Flight_id PRIMARY KEY,
+REG varchar(40) NOT NULL,
+Employee_id int NOT NULL CHECK(EMPLOYEE.Position = 'PILOT' AND EMPLOYEE.Airline=PLANE.Airline),
+Route_id int NOT NULL);
+
+create table REPAIRLOG(
+Order_id int PRIMARY KEY,
+REG varchar(40) NOT NULL,
+Employee_id int NOT NULL CHECK(EMPLOYEE.Position ='MECHANIC'),
+Repair_part varchar(255));
+--widok-----
+CREATE OR REPLACE FORCE VIEW "ROUTES_VIEW"("ROUTE","AIRLINE","MODEL","MAKE","REPAIR_STATUS","AvgTime") AS SELECT
+routes.Route_id,
+airlines.Airline,
+planes.Model,
+planes.Producer,
+repairs.Status,
+routes.AvgTime
+FROM
+ROUTES routes,
+AIRLINES airlines,
+PLANES planes,
+REPAIRS repairs;
+
+ALTER TABLE "PLANES" ADD CONSTRAINT "Airline_id_fk" FOREIGN KEY ("Airline_id")
+	  REFERENCES "AIRLINES" ("Airline_id") ENABLE;
+
+ALTER TABLE "EMPLOYEE" ADD CONSTRAINT "Airline_id_fk" FOREIGN KEY ("Airline_id")
+	  REFERENCES "AIRLINES" ("Airline_id") ENABLE;
+
+ALTER TABLE "REPAIRS" ADD CONSTRAINT "REG_fk" FOREIGN KEY ("REG")
+	  REFERENCES "PLANES" ("REG") ENABLE;
+
+ALTER TABLE "AIRLINES" ADD CONSTRAINT "Employee_id_fk" FOREIGN KEY ("Employee_id)
+	  REFERENCES "EMPLOYEE" ("Employee_id") ENABLE;
+
+ALTER TABLE "FLIGHT" ADD CONSTRAINT "REG_fk" FOREIGN KEY ("REG")
+	  REFERENCES "PLANES" ("REG") ENABLE;
+
+ALTER TABLE "FLIGHT" ADD CONSTRAINT "Employee_id_fk" FOREIGN KEY ("Employee_id")
+	  REFERENCES "EMPLOYEE" ("Employee_id") ENABLE;
+
+ALTER TABLE "FLIGHT" ADD CONSTRAINT "Route_id_fk" FOREIGN KEY ("Route_id_id")
+	  REFERENCES "ROUTES" ("Route_id") ENABLE;
+
+ALTER TABLE "REPAIRLOG" ADD CONSTRAINT "Employee_id_fk" FOREIGN KEY ("Employee_id")
+	  REFERENCES "EMPLOYEE" ("Employee_id") ENABLE;
+
+ALTER TABLE "REPAIRLOG" ADD CONSTRAINT "REG_fk" FOREIGN KEY ("REG")
+	  REFERENCES "PLANES" ("REG") ENABLE;
+
+
+
+
+
+
